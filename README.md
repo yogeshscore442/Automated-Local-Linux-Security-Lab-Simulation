@@ -1,25 +1,24 @@
 # Automated Local Linux Security Lab Simulation
 
-A production-grade, automated Linux Security Lab environment designed for vulnerability research, privilege escalation auditing, and bug hunting practice. 
+An educational, production-grade Linux Security Lab simulation environment containing exactly **10 Problem Statements** across **80 distinct local vulnerabilities and misconfigurations** (easy, medium, and hard difficulty settings) inside a Debian-based host (e.g., Kali Linux).
 
-This repository contains `mega_os_lab.sh`, a shell provisioning script that sets up exactly **10 Problem Statements** across **80 distinct local vulnerabilities and misconfigurations** (easy, medium, and hard difficulty settings) inside a Debian-based host (e.g., Kali Linux).
+This lab is built specifically for security enthusiasts, system administrators, and vulnerability researchers to practice local OS auditing, privilege escalation, and configuration review.
 
 ---
 
 ## 🛠️ Lab Setup and Deployment
 
-Follow these steps to deploy the lab environment on your target Kali/Debian host.
+Follow these steps to deploy the lab environment on your target Kali/Debian machine.
 
 ### Prerequisites
-
 - A Debian-based Linux operating system (Kali Linux is highly recommended).
 - Root privileges (`sudo` access).
 
 ### Step 1: Clone the Repository
 Clone this repository to your local target machine:
 ```bash
-git clone https://github.com/<your-username>/<your-repo-name>.git
-cd <your-repo-name>
+git clone https://github.com/yogeshscore442/Automated-Local-Linux-Security-Lab-Simulation.git
+cd Automated-Local-Linux-Security-Lab-Simulation
 ```
 
 ### Step 2: Make the Script Executable
@@ -70,29 +69,81 @@ Every subsystem configuration is located under `/home/hackathon_lab/` and includ
 
 ---
 
-## 🚩 Flag Format
+## 🎯 How to Use the Lab (Access & Discovery)
 
-Each challenge features a target flag embedded within files or services:
-`Flag{PSXX_LXX_DESCRIPTIVE_NAME}`
+This lab is designed to be fully audited through the Command Line Interface (CLI). 
+
+### 1. Finding Required Skills and Objectives
+Each Problem Statement directory (`PS-01` to `PS-10`) contains a `README.md` file.
+Before attacking any subsystem:
+```bash
+cat /home/hackathon_lab/PS-01/README.md
+```
+This document outlines:
+- **THE MOTIVE**: Why this specific subsystem is critical to OS security.
+- **REQUIRED CLI SKILLS**: The essential Linux tools you must use to discover the vulnerabilities.
+- **LAB OBJECTIVE**: A high-level context guide pointing you toward Easy, Medium, and Hard vulnerability structures.
+
+### 2. General Auditing Techniques
+
+To solve the 80 challenges, you will need to apply various system administration and penetration testing techniques. Here are the core methodologies:
+
+#### Technique A: Privilege Escalation Auditing
+- **SUID/SGID Binaries**: Look for files that run with owner (root) privileges.
+  ```bash
+  find /home/hackathon_lab -perm -4000 -type f 2>/dev/null
+  ```
+- **Linux Capabilities**: Locate binaries with special capabilities assigned.
+  ```bash
+  getcap -r /home/hackathon_lab 2>/dev/null
+  ```
+- **Sudo Permissions**: List commands the user is allowed to run as root.
+  ```bash
+  sudo -l
+  ```
+
+#### Technique B: Network & Socket Auditing
+- **TCP/UDP Socket Discovery**: Find active network services running on loopback ports.
+  ```bash
+  ss -tulpn
+  # or
+  netstat -antup
+  ```
+- **IPC Unix Sockets**: Inspect local inter-process communication sockets.
+  ```bash
+  ss -x -a
+  # or
+  lsof -U
+  ```
+
+#### Technique C: File System & Permissions Review
+- **Writable Files**: Identify misconfigured scripts or directories that any user can write to.
+  ```bash
+  find /home/hackathon_lab -writable -type f 2>/dev/null
+  ```
+- **Sticky Bit Verification**: Audit shared directories to ensure users cannot delete files they do not own.
+  ```bash
+  ls -ld /home/hackathon_lab/PS-07/medium/shared_project
+  ```
+- **Symbolic Link Auditing**: Check if symlinks point to highly restricted files (like `/etc/shadow` or `/root`).
+  ```bash
+  ls -laR /home/hackathon_lab
+  ```
+
+#### Technique D: Cryptographic Auditing
+- **Credentials & Key Harvesting**: Search for plaintext private key banners or hash algorithms.
+  ```bash
+  grep -rn "PRIVATE KEY" /home/hackathon_lab
+  ```
+- **Hash Analysis**: Identify weak MD5 or saltless hashes and attempt to crack them using standard tools like `john` or `hashcat`.
 
 ---
 
-## 🚀 Uploading to GitHub
+## 🚩 Flag Verification
 
-If you want to host this lab configuration on your GitHub account, run these commands from the local repository directory:
+Every successfully solved or audited challenge reveals a flag in the following format:
+`Flag{PSXX_LXX_DESCRIPTIVE_NAME}`
 
-1. **Initialize git:**
-   ```bash
-   git init
-   git add mega_os_lab.sh README.md
-   git commit -m "Initial commit: Add automated Linux security lab provisioning files"
-   ```
-
-2. **Create a repository on GitHub** (e.g. named `linux-security-lab`).
-
-3. **Link to your remote repository and push:**
-   ```bash
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/linux-security-lab.git
-   git push -u origin main
-   ```
+For example:
+- `Flag{PS02_L01_SUID_AWK}` represents **Problem Statement 2 (Access Control), Level 1 (Easy), awk privilege escalation**.
+- Search files, capture command inputs, connect to sockets, or read privileged outputs to extract all 80 flags!
